@@ -61,10 +61,11 @@
             flex: 0 0 50%;
             padding: 20px;
             box-sizing: border-box;
+            margin-left: 71px;
         }
 
         .content h1 {
-            font-size: 66px;
+            font-size: 35px;
             margin-bottom: 20px;
           
         }
@@ -131,7 +132,7 @@
         </nav>
         <main>
             <div class="content">
-                <h1>Improve your digital <span class="highlight">coin</span> experience & <span class="highlight">easyexchanges</span> with easycoin</h1>
+                <h1>Improve your <br> digital <span class="highlight">coin</span> <br> experience & <br> <span class="highlight">easyexchanges</span> <br> with easycoin</h1>
                 <h3>We get solutions for all your digital currency storage and exchange needs.</h3>
                 <div class="buttons">
                     <a href="#" class="btn btn-primary">Exchange rate</a>
@@ -152,7 +153,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", () => {
           const scene = new THREE.Scene();
-          const camera = new THREE.PerspectiveCamera(30, window.innerWidth / 2 / window.innerHeight, 0.1, 1000);
+          const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000);
           const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
           const container = document.getElementById('model-container');
@@ -160,13 +161,13 @@
           container.appendChild(renderer.domElement);
 
           const light = new THREE.PointLight(0xffffff, 1, 100);
-          light.position.set(0, 18, 10);
+          light.position.set(0, -18, 10);
           scene.add(light);
 
           const loader = new THREE.OBJLoader();
           let coin;
 
-          loader.load('./threed.obj', (object) => {
+          loader.load('./Coin.obj', (object) => {
               const goldMaterial = new THREE.MeshStandardMaterial({
                   color: 0xffd700, // Gold color
                   metalness: 0.4, // Fully metallic
@@ -182,13 +183,13 @@
               coin = object;
               scene.add(coin);
 
-              coin.position.set(1000, -1000, 0); // Start from bottom right
+              coin.position.set(50, -50, 1); // Start from bottom right
               coin.rotation.set(0, 0, 0);
 
-              coin.scale.set(2, 2, 2); // Increase size
+              coin.scale.set(1.2, 1.2, 1.2); // Increase size
 
               const starGeometry = new THREE.BufferGeometry();
-              const starMaterial = new THREE.PointsMaterial({ color: 0xffd700, size: 0.4 });
+              const starMaterial = new THREE.PointsMaterial({ color: 0xffd700, size: 0.2 });
               const starCount = 3000; // Adjust the number of stars as needed
 
               const starPositions = new Float32Array(starCount * 3);
@@ -203,7 +204,7 @@
               scene.add(stars);
 
               // Animation to center
-              const targetPosition = { x: 12, y: -12 }; // Target position for both coin and stars
+              const targetPosition = { x: 30, y: -10 }; // Target position for both coin and stars
 
               gsap.to(coin.position, {
                   x: targetPosition.x,
