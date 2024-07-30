@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Draw and Modify Shape with Three.js</title>
+    <style>
+        /* body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #f0f0f0; 
+        }
+        canvas { display: block; }
+        #buttons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        } */
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<div id="buttons">
+    <button id="draw-button">Draw Shape</button>
+    <button id="finish-button" disabled>Finish</button>
+    <button id="modify-button" disabled>Modify Curves</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    let scene, camera, renderer;
+    let isDrawing = false;
+    let shapeVertices = [];
+    let shapeLines = [];
+    let anchorPoints = [];
+    let isModifying = false;
+
+    function init() {
+        // Create the scene
+        scene = new THREE.Scene();
+
+        // Create the camera
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        // Create the renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xf0f0f0, 1);  // Set background color to match the page
+        document.body.appendChild(renderer.domElement);
+
+        // Add event listeners for the buttons
+        document.getElementById('draw-button').addEventListener('click', () => {
+            isDrawing = !isDrawing;
+            document.getElementById('finish-button').disabled = !isDrawing;
+            document.getElementById('modify-button').disabled = true;
+        });
+
+        document.getElementById('finish-button').addEventListener('click', () => {
+            isDrawing = false;
+            document.getElementById('finish-button').disabled = true;
+            document.getElementById('modify-button').disabled = false;
+            drawShape();
+        });
+
+        document.getElementById('modify-button').addEventListener('click', () => {
+            isModifying = !isModifying;
+            if (isModifying) {
+                addAnchorPoints();
+            } else {
+                removeAnchorPoints();
+            }
+        });
+
+        // Add an event listener for mouse clicks
+        window.addEventListener('click', onMouseClick);
+        window.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+
+        // Render the scene
+        animate();
+    }
+
+    function onMouseDown(event) {
+        if (!isDrawing) return;
+
+        // Convert mouse click to normalized device coordinates
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Unproject the mouse position to 3D space
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.80).unproject(camera);
+
+        // Create a new vertex at the mouse position
+        const vertex = new THREE.Vector3(vector.x, vector.y, 0.80);
+        shapeVertices.push(vertex);
+
+        if (shapeVertices.length > 1) {
+          const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+          const geometry = new THREE.BufferGeometry().setFromPoints([shapeVertices[shapeVertices.length - 2], vertex]);
+          currentLine = new THREE.Line(geometry, material);
+          shapeLines.push(currentLine);
+          scene.add(currentLine);
+        }
+      }
+
+      function onMouseMove(event) {
+        if (!isDrawing || shapeVertices.length === 0) return;
+
+        // Convert mouse movement to normalized device coordinates
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Unproject the mouse position to 3D space
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.80).unproject(camera);
+
+        // Update the last vertex position
+        const vertex = new THREE.Vector3(vector.x, vector.y, 0.80);
+        const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        const geometry = new THREE.BufferGeometry().setFromPoints([shapeVertices[shapeVertices.length - 1], vertex]);
+        if (currentLine) {
+          scene.remove(currentLine);
+        }
+        currentLine = new THREE.Line(geometry, material);
+        scene.add(currentLine);
+      }
+
+      function onMouseUp(event) {
+        if (!isDrawing || shapeVertices.length === 0) return;
+
+        // Finalize the last vertex position
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Unproject the mouse position to 3D space
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.80).unproject(camera);
+
+        // Create a new vertex at the mouse position
+        const vertex = new THREE.Vector3(vector.x, vector.y, 0.80);
+        shapeVertices.push(vertex);
+
+        const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        const geometry = new THREE.BufferGeometry().setFromPoints([shapeVertices[shapeVertices.length - 2], vertex]);
+        if (currentLine) {
+          scene.remove(currentLine);
+        }
+        currentLine = new THREE.Line(geometry, material);
+        shapeLines.push(currentLine);
+        scene.add(currentLine);
+        shapeVertices.pop();
+      }
+
+      function onMouseClick(event) {
+        if (!isDrawing) return;
+
+        // Convert mouse click to normalized device coordinates
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Unproject the mouse position to 3D space
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.80).unproject(camera);
+
+        // Create a new vertex at the mouse position
+        const vertex = new THREE.Vector3(vector.x, vector.y, 0.80);
+        shapeVertices.push(vertex);
+
+        if (shapeVertices.length > 1) {
+            const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+            const geometry = new THREE.BufferGeometry().setFromPoints([shapeVertices[shapeVertices.length - 2], vertex]);
+            const line = new THREE.Line(geometry, material);
+            shapeLines.push(line);
+            scene.add(line);
+        }
+    }
+
+
+      function drawShape() {
+        if (shapeVertices.length < 3) return;
+
+        const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        shapeVertices.push(shapeVertices[0]); // Close the shape by connecting to the first vertex
+        const geometry = new THREE.BufferGeometry().setFromPoints(shapeVertices);
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+
+        // Remove previous individual lines
+        shapeLines.forEach(line => scene.remove(line));
+        shapeLines = [];
+
+        shapeVertices.pop(); // Remove the duplicated vertex
+      }
+
+    function addAnchorPoints() {
+        shapeVertices.forEach(vertex => {
+            const anchorGeometry = new THREE.CircleGeometry(0.20, 32);
+            const anchorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const anchor = new THREE.Mesh(anchorGeometry, anchorMaterial);
+            anchor.position.copy(vertex);
+            anchorPoints.push(anchor);
+            scene.add(anchor);
+
+            anchor.userData = { vertex };
+
+            const raycaster = new THREE.Raycaster();
+            let isDragging = false;
+            let offset = new THREE.Vector3();
+
+            function onPointerDown(event) {
+                raycaster.setFromCamera(new THREE.Vector2((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1), camera);
+                const intersects = raycaster.intersectObject(anchor);
+
+                if (intersects.length > 0) {
+                    isDragging = true;
+                    offset.copy(intersects[0].point).sub(anchor.position);
+                }
+            }
+
+            function onPointerMove(event) {
+                if (isDragging) {
+                    raycaster.setFromCamera(new THREE.Vector2((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1), camera);
+                    const intersects = raycaster.intersectObject(anchor);
+
+                    if (intersects.length > 0) {
+                        const point = intersects[0].point.sub(offset);
+                        anchor.position.copy(point);
+                        anchor.userData.vertex.copy(point);
+                        updateShape();
+                    }
+                }
+            }
+
+            function onPointerUp() {
+                isDragging = false;
+            }
+
+            window.addEventListener('pointerdown', onPointerDown);
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+
+            anchor.userData.cleanup = () => {
+                window.removeEventListener('pointerdown', onPointerDown);
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', onPointerUp);
+            };
+        });
+    }
+
+    function removeAnchorPoints() {
+        anchorPoints.forEach(anchor => {
+            anchor.userData.cleanup();
+            scene.remove(anchor);
+        });
+        anchorPoints = [];
+    }
+
+    function updateShape() {
+        const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        const geometry = new THREE.BufferGeometry().setFromPoints([...shapeVertices, shapeVertices[0]]);
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+
+        // Remove previous shape
+        scene.children.forEach(child => {
+            if (child.type === "Line" && child !== line) {
+                scene.remove(child);
+            }
+        });
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    init();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
