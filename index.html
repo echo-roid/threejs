@@ -61,7 +61,6 @@
             flex: 0 0 50%;
             padding: 20px;
             box-sizing: border-box;
-            padding-left: 81px;
         }
 
         .content h1 {
@@ -194,7 +193,7 @@
 
               const starPositions = new Float32Array(starCount * 3);
               for (let i = 0; i < starCount; i++) {
-                  starPositions[i * 5] = (Math.random() - 0.5) * 100;
+                  starPositions[i * 3] = (Math.random() - 0.5) * 100;
                   starPositions[i * 2+ 1] = (Math.random() - 0.5) * 100;
                   starPositions[i * 3 + 2] = (Math.random() - 0.5) * 100;
               }
