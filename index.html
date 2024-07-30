@@ -62,18 +62,19 @@
             padding: 20px;
             box-sizing: border-box;
             margin-left: 71px;
+            height: 0;
+            overflow: hidden;
+            transition: all 2s ease;
         }
 
         .content h1 {
             font-size: 35px;
             margin-bottom: 20px;
-          
         }
 
         .content h3 {
             font-size: 28px;
             margin-bottom: 20px;
-           
             margin-top: 50px;
             color: rgb(165, 163, 163);
         }
@@ -149,7 +150,16 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-
+    <script>
+        function animationsfortext(){
+          
+          document.getElementsByClassName("content")[0].style.height =  "100%"
+        }
+        setTimeout(()=>{
+            animationsfortext()
+        },100)
+       
+  </script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
           const scene = new THREE.Scene();
@@ -258,7 +268,54 @@
                   });
               }
           });
+
+          // Crystal breaking effect
+          function triggerBreakingEffect() {
+              const particleCount = 1000;
+              const particles = new THREE.Geometry();
+              const particleMaterial = new THREE.PointsMaterial({
+                  color: 0x9ac3ff,
+                  size: 0.5,
+                  transparent: true,
+                  opacity: 0.8,
+              });
+
+              for (let i = 0; i < particleCount; i++) {
+                  const particle = new THREE.Vector3(
+                      coin.position.x + (Math.random() - 0.5) * 2,
+                      coin.position.y + (Math.random() - 0.5) * 2,
+                      coin.position.z + (Math.random() - 0.5) * 2
+                  );
+                  particles.vertices.push(particle);
+              }
+
+              const particleSystem = new THREE.Points(particles, particleMaterial);
+              scene.add(particleSystem);
+
+              gsap.to(particleSystem.position, {
+                  duration: 2,
+                  ease: "power2.out",
+                  onUpdate: () => {
+                      for (let i = 0; i < particles.vertices.length; i++) {
+                          const particle = particles.vertices[i];
+                          particle.x += (Math.random() - 0.5) * 0.1;
+                          particle.y += (Math.random() - 0.5) * 0.1;
+                          particle.z += (Math.random() - 0.5) * 0.1;
+                      }
+                      particles.verticesNeedUpdate = true;
+                  },
+                  onComplete: () => {
+                      scene.remove(particleSystem);
+                  },
+              });
+          }
+
+          // Trigger the breaking effect on click
+          container.addEventListener('click', triggerBreakingEffect);
       });
     </script>
+
+
+
 </body>
 </html>
