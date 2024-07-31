@@ -161,8 +161,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
             const container = document.getElementById('model-container');
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
@@ -172,113 +173,75 @@
             scene.add(light);
 
             const loader = new THREE.OBJLoader();
-            let coin, stars;
-            let twinkling = false;
-            let rotateDirection = 1;
+            let coin;
+            let stars;
 
-            loader.load('Coin.obj', (object) => {
-                const vertices = [];
+            loader.load('./Coin.obj', (object) => {
+                const goldMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffd700, // Gold color
+                    metalness: 0.4, // Fully metallic
+                    roughness: 0.1, // Smooth surface
+                });
+
+                // Apply the gold material to the loaded object
                 object.traverse((child) => {
                     if (child.isMesh) {
-                        const positions = child.geometry.attributes.position.array;
-                        for (let i = 0; i < positions.length; i += 3) {
-                            vertices.push(positions[i], positions[i + 1], positions[i + 2]);
-                        }
+                        child.material = goldMaterial;
                     }
                 });
-
-                const pointGeometry = new THREE.BufferGeometry();
-                pointGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-                const pointMaterial = new THREE.PointsMaterial({ color: 0xffd700, size: Math.random() * 0.1 + 0.0005 });
-
-                coin = new THREE.Points(pointGeometry, pointMaterial);
+                coin = object;
                 scene.add(coin);
-                coin.position.set(1000, -1000, 0); // Start from bottom right
+
+                coin.position.set(50, -50, 1); // Start from bottom right
                 coin.rotation.set(0, 0, 0);
-                coin.scale.set(0.8, 0.8, 0.8);
+
+                coin.scale.set(1.2, 1.2, 1.2); // Increase size
 
                 const starGeometry = new THREE.BufferGeometry();
-                const starMaterial = new THREE.ShaderMaterial({
-                    uniforms: {
-                        color: { value: new THREE.Color(0xffd700) },
-                        time: { value: 0 },
-                    },
-                    vertexShader: `
-                        uniform float time;
-                        varying vec3 vColor;
-                        void main() {
-                            vColor = vec3(1.0, 0.843, 0); // Gold color
-                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                            float twinkle = sin(time + position.x * 10.0) * 0.5 + 0.5;
-                            gl_PointSize = (0.2 + twinkle * 0.1) * (300.0 / -mvPosition.z); // Adjust point size based on distance and twinkle
-                            gl_Position = projectionMatrix * mvPosition;
-                        }
-                    `,
-                    fragmentShader: `
-                        varying vec3 vColor;
-                        void main() {
-                            gl_FragColor = vec4(vColor, 1.0);
-                        }
-                    `,
-                    transparent: true,
-                });
-
+                const starMaterial = new THREE.PointsMaterial({ color: 0xffd700, size: 0.2 });
                 const starCount = 3000; // Adjust the number of stars as needed
+
                 const starPositions = new Float32Array(starCount * 3);
                 for (let i = 0; i < starCount; i++) {
                     starPositions[i * 3] = (Math.random() - 0.5) * 100;
                     starPositions[i * 3 + 1] = (Math.random() - 0.5) * 100;
                     starPositions[i * 3 + 2] = (Math.random() - 0.5) * 100;
                 }
+
                 starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
                 stars = new THREE.Points(starGeometry, starMaterial);
                 scene.add(stars);
 
                 // Animation to center
-                const targetPosition = { x: 30, y: -12 };
+                const targetPosition = { x: 30, y: -10 }; // Target position for both coin and stars
+
                 gsap.to(coin.position, {
                     x: targetPosition.x,
                     y: targetPosition.y,
                     duration: 3.5,
                     ease: "power2.out",
                 });
+
                 gsap.to(stars.position, {
                     x: targetPosition.x,
                     y: targetPosition.y,
                     duration: 3.5,
                     ease: "power2.out",
                     onComplete: () => {
+                        // Start rotating the stars after they reach the center
                         gsap.to(stars.rotation, { y: Math.PI * 1.25, duration: 20, ease: "none", repeat: -1 });
                     }
                 });
-                gsap.to(coin.rotation, { y: Math.PI * 1.25, duration: 20, ease: "none", repeat: -1 });
 
-                // Handle star and coin rotation on click
-                container.addEventListener('click', () => {
-                    twinkling = !twinkling;
-                    rotateDirection *= -1; // Toggle rotation direction
-                    gsap.to(stars.rotation, { y: `+=${Math.PI * 1.25 * rotateDirection}`, duration: 20, ease: "none", repeat: -1 });
-                    gsap.to(coin.rotation, { y: `+=${Math.PI * 1.25 * rotateDirection}`, duration: 20, ease: "none", repeat: -1 });
-                });
+                // Continuous slow rotation of the coin
+                gsap.to(coin.rotation, { y: Math.PI * 1.5, duration: 20, ease: "none", repeat: -1 });
             });
 
-            camera.position.z = 35;
-
-            // Mouse movement interaction
-            window.addEventListener('mousemove', (event) => {
-                const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-                const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                camera.position.x = mouseX * 10;
-                camera.position.y = mouseY * 10;
-                camera.lookAt(scene.position);
-            });
+            camera.position.z = 70; // Adjust camera distance for larger object
 
             const animate = () => {
                 requestAnimationFrame(animate);
                 renderer.render(scene, camera);
-                if (twinkling) {
-                    starMaterial.uniforms.time.value += 0.5;
-                }
             };
 
             animate();
@@ -289,6 +252,72 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.clientWidth, container.clientHeight);
             });
+
+            // Add mouse movement listener
+            window.addEventListener('mousemove', (event) => {
+                if (coin && stars) {
+                    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                    gsap.to(coin.rotation, {
+                        x: mouseY * 0.5,
+                        y: mouseX * 0.5,
+                        duration: 0.5,
+                        ease: "power2.out",
+                    });
+
+                    gsap.to(stars.position, {
+                        x: mouseX * 10,
+                        y: mouseY * 10,
+                        duration: 0.5,
+                        ease: "power2.out",
+                    });
+                }
+            });
+
+            // Crystal breaking effect
+            function triggerBreakingEffect() {
+                const particleCount = 1000;
+                const particles = new THREE.Geometry();
+                const particleMaterial = new THREE.PointsMaterial({
+                    color: 0x9ac3ff,
+                    size: 0.5,
+                    transparent: true,
+                    opacity: 0.8,
+                });
+
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = new THREE.Vector3(
+                        coin.position.x + (Math.random() - 0.5) * 2,
+                        coin.position.y + (Math.random() - 0.5) * 2,
+                        coin.position.z + (Math.random() - 0.5) * 2
+                    );
+                    particles.vertices.push(particle);
+                }
+
+                const particleSystem = new THREE.Points(particles, particleMaterial);
+                scene.add(particleSystem);
+
+                gsap.to(particleSystem.position, {
+                    duration: 2,
+                    ease: "power2.out",
+                    onUpdate: () => {
+                        for (let i = 0; i < particles.vertices.length; i++) {
+                            const particle = particles.vertices[i];
+                            particle.x += (Math.random() - 0.5) * 0.1;
+                            particle.y += (Math.random() - 0.5) * 0.1;
+                            particle.z += (Math.random() - 0.5) * 0.1;
+                        }
+                        particles.verticesNeedUpdate = true;
+                    },
+                    onComplete: () => {
+                        scene.remove(particleSystem);
+                    },
+                });
+            }
+
+            // Trigger the breaking effect on click
+            container.addEventListener('click', triggerBreakingEffect);
         });
     </script>
 </body>
