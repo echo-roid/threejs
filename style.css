@@ -48,6 +48,11 @@ body {
       width: 100%;
   }
   
+  .contents{
+    height: 0;
+    transition: all 1s ease;
+    overflow: hidden;
+  }
   .content {
     color: #fff;
     text-align: left;
@@ -56,7 +61,7 @@ body {
     padding: 20px; 
     box-sizing: border-box; 
     padding-left: 60px;
-
+   
   }
   
   .content h1 {

@@ -1,5 +1,5 @@
 function animationsfortext() {
-    document.getElementsByClassName("content")[0].style.height = "100%";
+    document.getElementsByClassName("contents")[0].style.height = "100%";
 }
 setTimeout(() => {
     animationsfortext();
