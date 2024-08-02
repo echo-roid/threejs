@@ -1,42 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="./style.css">
-    <title>Three.js 3D Bitcoin Model</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easycoin</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <div class="logo">Easycoin - Digital Coin Experience</div>
-            <ul class="nav-links">
-                <li><a href="#">Get Wallet</a></li>
-                <li><a href="#">Feedback</a></li>
-                <li><a href="#">So Easy</a></li>
-                <li><a href="#">Exchanges</a></li>
-                <li><a href="#">NFT</a></li>
-                <li><a href="#">Services</a></li>
-            </ul>
-        </nav>
-        <main>
-            <div class="content">
-                <h1>Improve your <br> digital <span class="highlight">coin</span> <br> experience & <br> <span class="highlight">easyexchanges</span> <br> with easycoin</h1>
-                <h3>We get solutions for all your digital currency storage and exchange needs.</h3>
-                <div class="buttons">
-                    <a href="#" class="btn btn-primary">Exchange rate</a>
-                    <a href="#" class="btn btn-secondary">Calculator</a>
-                    <a href="#" class="btn btn-secondary">Alerts</a>
-                    <a href="#" class="btn btn-secondary">Double exchange</a>
-                </div>
-            </div>
-            <div id="model-container"></div>
-        </main>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/OBJLoader.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    <script src="./index.js"></script>
+  <div class="container">
+    <nav>
+      <div class="logo">Easycoin - Digital Coin Experience</div>
+      <ul class="nav-links">
+        <li><a href="#">Get Wallet</a></li>
+        <li><a href="#">Feedback</a></li>
+        <li><a href="#">So Easy</a></li>
+        <li><a href="#">Exchanges</a></li>
+        <li><a href="#">NFT</a></li>
+        <li><a href="#">Services</a></li>
+      </ul>
+    </nav>
+    <main>
+      <div class="content">
+        <h1>Improve your digital <span class="highlight">coin</span> experience & <span class="highlight">easyexchanges</span> with easycoin</h1>
+        <h3>We get solutions for all your digital currency storage and exchange needs.</h3>     
+        <div class="buttons">
+          <a href="#" class="btn btn-primary">Exchange rate</a>
+          <a href="#" class="btn btn-secondary">Calculator</a>
+          <a href="#" class="btn btn-secondary">Alerts</a>
+          <a href="#" class="btn btn-secondary">Double exchange</a>
+        </div>
+      </div>
+      <div id="stars-container"></div>
+      <div id="coin-container"></div>
+    </main>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
