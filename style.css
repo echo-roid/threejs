@@ -54,19 +54,21 @@ body {
     z-index: 10; 
     flex: 0 0 50%; 
     padding: 20px; 
-    box-sizing: border-box; /
+    box-sizing: border-box; 
+    padding-left: 60px;
+
   }
   
   .content h1 {
     font-size: 66px;
     margin-bottom: 20px;
-    text-align: center;
+
   }
   
   .content h3 {
     font-size: 28px;
     margin-bottom: 20px;
-    text-align: center;
+    
     margin-top: 50px;
     color: rgb(165, 163, 163);
   }
