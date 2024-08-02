@@ -60,13 +60,13 @@ body {
   .content h1 {
     font-size: 66px;
     margin-bottom: 20px;
-
+    text-align: center;
   }
   
   .content h3 {
     font-size: 28px;
     margin-bottom: 20px;
-    
+    text-align: center;
     margin-top: 50px;
     color: rgb(165, 163, 163);
   }
